@@ -1,5 +1,5 @@
 <resources>
     <string name="app_name">IotTermometer</string>
-    <string name="temperature_value">Temperature = %s\u2103</string>
-    <string name="humidity_value">Humidity = %s\%%</string>
+    <string name="temperature_value">%s\u2103</string>
+    <string name="humidity_value">Humidity: %s\%%</string>
 </resources>

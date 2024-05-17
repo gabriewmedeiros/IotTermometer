@@ -1,6 +1,10 @@
 package com.example.iottermometer
 
 import android.os.Bundle
+import android.view.View
+import android.view.WindowManager
+import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -20,19 +24,33 @@ class MainActivity : AppCompatActivity() {
     private var client: MqttAndroidClient? = null
     private var tvTemperature: TextView? = null
     private var tvHumidity: TextView? = null
+    private var ivHumidity: ImageView? = null
+    private var progressBar: ProgressBar? = null
     private val temperatureTopic = "Temperature"
     private val humidityTopic = "Humidity"
+    private var isTemperatureLoaded = false
+    private var isHumidityLoaded = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val clientId = MqttClient.generateClientId()
-        client = MqttAndroidClient(this.applicationContext, mqttHost, clientId)
-        val options = MqttConnectOptions()
+        window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
 
         tvTemperature = findViewById(R.id.tvTemperature)
         tvHumidity = findViewById(R.id.tvHumidity)
+        ivHumidity = findViewById(R.id.ivHumidity)
+        progressBar = findViewById(R.id.indeterminateBar)
+
+        ivHumidity?.visibility = View.GONE
+
+       setupMQTT()
+    }
+
+    private fun setupMQTT() {
+        val clientId = MqttClient.generateClientId()
+        client = MqttAndroidClient(this.applicationContext, mqttHost, clientId)
+        val options = MqttConnectOptions()
 
         try {
             val token: IMqttToken = client!!.connect(options)
@@ -58,10 +76,19 @@ class MainActivity : AppCompatActivity() {
                 when (topic) {
                     temperatureTopic -> {
                         tvTemperature?.text = getString(R.string.temperature_value, String(message.payload))
+                        isTemperatureLoaded = true
                     }
                     humidityTopic -> {
                         tvHumidity?.text = getString(R.string.humidity_value, String(message.payload))
+                        isHumidityLoaded = true
                     }
+                }
+
+                if (isTemperatureLoaded && isHumidityLoaded) {
+                    progressBar?.visibility = View.GONE
+                    tvTemperature?.visibility = View.VISIBLE
+                    tvHumidity?.visibility = View.VISIBLE
+                    ivHumidity?.visibility = View.VISIBLE
                 }
             }
 
